@@ -1,7 +1,5 @@
 # GIT使用手记
-## git 是 Linus Torvalds 除了 Linux 之外的另一杰作，是现如今使用最多的多人协作版本管理工具
-# GIT使用手记
-## git 是 Linus Torvalds 除了 Linux 之外的另一杰作，是现如今使用最多的多人协作版本管理工具
+##### git 是 Linus Torvalds 除了 Linux 之外的另一杰作，是现如今使用最多的多人协作版本管理工具
 
 ### <table border=0 >常用命令
 命令 说明 其它

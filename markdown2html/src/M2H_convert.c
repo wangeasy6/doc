@@ -2,11 +2,15 @@
 
 FILE *g_fd_output;
 
-char g_tag_stack[2][STACK_DEPTH][MAX_TAG_LEN];
-unsigned char g_stack_index = 0;
-unsigned char g_same_tag = 0;
+char g_tag_stack[2][STACK_DEPTH][MAX_TAG_LEN];  //以栈结构存储tag
+unsigned char g_stack_index = 0;                //计数缩进
+unsigned char g_same_tag = 0;                   //数是否有相同tag，使相同tag有相同的缩进
 
-//unsigned int g_
+unsigned int g_l1 = 0;       //用于标题计数
+unsigned int g_l2 = 0;       //用于行计数
+unsigned int g_l3 = 0;       //用于子行计数
+
+extern char **g_file_path;
 
 static void stack_up(char *prefix, char *suffix)
 {
@@ -60,9 +64,11 @@ static void stack_down()
 
 static void analysis_md(char *sentence)
 {
-      int i;
+      int i = 0;
       char prefix[MAX_TAG_LEN] = {0};
       char suffix[MAX_TAG_LEN] = {0};
+      char txt[MAX_TXT_LEN] ={0};
+      
       switch(sentence[0])
       {
             case '#':
@@ -73,16 +79,44 @@ static void analysis_md(char *sentence)
                               break;
                   }
                   snprintf(prefix, MAX_TAG_LEN, "<h%d>", i);
-                  snprintf(suffix, MAX_TAG_LEN, "</h%d>\r\n", i);
-                  
+                  snprintf(suffix, MAX_TAG_LEN, "</h%d>\r\n", i); 
+
+                  if (3 == i)
+                        snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l1++, &sentence[i]);
+                  else
+                        snprintf(txt, MAX_TXT_LEN, "%s", &sentence[i]);
+
                   stack_up(prefix, suffix);
-                  fputs(&sentence[i], g_fd_output);
+                  fputs(txt, g_fd_output);
                   stack_down();
-                  
+
+                  g_l2 = 0;
+                  g_l3 = 0;
                   break;
             }
             case '*':
-            {
+            { 
+                  while (1)
+                  {
+                        if (*sentence == '*' && *(sentence+1) == ' ')
+                        {
+                              i++;
+                              sentence += 2;
+                        }
+                        else
+                              break;
+                  }
+
+                  snprintf(prefix, MAX_TAG_LEN, "<div class=\"text-indent%d\">",i);
+                  snprintf(suffix, MAX_TAG_LEN, "</div>\r\n");
+                  
+                  if ( i == 1)      snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l2++, sentence);
+                  if ( i == 2)      snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l3++, sentence);
+
+                  stack_up(prefix, suffix);
+                  fputs(txt, g_fd_output);
+                  stack_down();
+                  
                   break;
             }
             case '%':
@@ -105,6 +139,9 @@ int M2H_convet( char *md_file_name)
       char suffix[] = "html";
       char buffer[BUFFER_SIZE] = {0};
       int i,j;
+
+      if ( FALSE == M2H_checkDIR(get_file_path(NULL, 1)))
+            return FALSE;
       
       for(i = 0; i < strlen(md_file_name); i++)
       {
@@ -119,27 +156,25 @@ int M2H_convet( char *md_file_name)
                   break;
             }
       }
-
-      snprintf( md_path, MAX_PATH_LEN, "%s/%s", g_config.md_path, md_file_name);
-      snprintf( html_path, MAX_PATH_LEN, "%s/%s", g_config.html_path, html_file_name);
       
-      if ( FALSE == M2H_copyFile("../template/header.html", html_path))
+      if ( FALSE == M2H_copyFile("../template/header.html", get_file_path(html_file_name, 1)))
       {
             printf("%s,%d: copy file failed\r\n", __FUNCTION__, __LINE__);
             return FALSE;
       }
 
-      FILE *fd_md = fopen( md_path, "r" );
+      FILE *fd_md = fopen( get_file_path(md_file_name, 0), "r" );
       if ( fd_md == NULL )
       {
             perror("open md");
             return FALSE;
       }
 
-      FILE *fd_html = fopen( html_path, "a" );
+      FILE *fd_html = fopen( get_file_path(html_file_name, 1), "a" );
       if ( fd_html == NULL )
       {
             perror("open html");
+            fclose(fd_md);
             return FALSE;
       }
       g_fd_output = fd_html;
@@ -163,21 +198,26 @@ int M2H_convet( char *md_file_name)
 }
 
 
-int M2H_copyFile(char *org_path, char *tar_path)
+int M2H_copyFile(char *org_file_path, char *tar_file_path)
 {
       char buffer[BUFFER_SIZE] = {0};
-      printf("%s: Copy %s to %s\r\n",__FUNCTION__, org_path, tar_path);
+      printf("%s: Copy %s to %s\r\n",__FUNCTION__, org_file_path, tar_file_path);
       
-      FILE *fd_org = fopen( org_path, "r" );
+      FILE *fd_org = fopen( org_file_path, "r" );
       if ( fd_org == NULL )
       {
             perror("open org");
             return FALSE;
       }
-      FILE *fd_tar = fopen( tar_path, "w+" );
+
+      char test_file_path[MAX_PATH_LEN] = {"\0"};
+      strncat(test_file_path, tar_file_path, MAX_PATH_LEN);
+      //FILE *fd_tar = fopen( tar_file_path, "w" );
+      FILE *fd_tar = fopen( test_file_path, "w" );
       if ( fd_tar == NULL )
       {
             perror("open tar");
+            fclose(fd_org);
             return FALSE;
       }
 
