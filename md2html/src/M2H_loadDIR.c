@@ -57,9 +57,15 @@ static int loop_readdir(char *path)
             {
                   printf("lstat error:%s\n",get_file_path(dirp->d_name, 0));
                   continue;
-            }else
-            if (S_ISDIR(dir_stat.st_mode))
-            {
+            }
+            else if (S_ISDIR(dir_stat.st_mode))
+            {     
+                  if (g_config.is_load_private == 0 && NULL != strstr(dirp->d_name, "private"))
+                  {
+                        printf("Skip the private folder\r\n");
+                        continue;
+                  }
+                  
                   strncpy(g_file_path[index_file_depth], dirp->d_name, MAX_PATH_LEN);
                   index_file_depth++;
                   if ( FALSE == M2H_checkDIR(get_file_path(NULL, 1)))
@@ -67,8 +73,13 @@ static int loop_readdir(char *path)
                   loop_readdir(get_file_path(NULL, 0));
                   memset(g_file_path[index_file_depth], '\0', MAX_PATH_LEN);
                   index_file_depth--;
-            }else
-            if ( NULL != strstr(dirp->d_name, ".md"))
+            }
+            else if (g_config.is_load_private == 0 && NULL != strstr(dirp->d_name, "_p.md"))
+            {
+                  printf("%s is private,jump over\r\n",dirp->d_name);
+                  continue;
+            }
+            else if ( NULL != strstr(dirp->d_name, ".md"))
             {
                   printf("%s\r\n",get_file_path(dirp->d_name, 0));
                   
@@ -76,7 +87,8 @@ static int loop_readdir(char *path)
                         printf("                                                                        Conveted\r\n");
                   else
                         printf("                                                                        Error\r\n");
-            }else
+            }
+            else
             {
                   //原样Copy
             }
