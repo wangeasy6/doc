@@ -91,7 +91,6 @@ static void analysis_md(char *sentence)
                   stack_down();
 
                   g_l2 = 0;
-                  g_l3 = 0;
                   break;
             }
             case '*':
@@ -110,8 +109,15 @@ static void analysis_md(char *sentence)
                   snprintf(prefix, MAX_TAG_LEN, "<div class=\"text-indent%d\">",i);
                   snprintf(suffix, MAX_TAG_LEN, "</div>\r\n");
                   
-                  if ( i == 1)      snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l2++, sentence);
-                  if ( i == 2)      snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l3++, sentence);
+                  if ( i == 1)
+                  {
+                        snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l2++, sentence);
+                        g_l3 = 0;
+                  }
+                  if ( i == 2)
+                  {
+                        snprintf(txt, MAX_TXT_LEN, "%d、%s", g_l3++, sentence);
+                  }
 
                   stack_up(prefix, suffix);
                   fputs(txt, g_fd_output);
@@ -178,6 +184,7 @@ int M2H_convet( char *md_file_name)
             return FALSE;
       }
       g_fd_output = fd_html;
+      g_l1 = 0;
 
       stack_up("<body>\r\n", "</body>\r\n");
       
