@@ -8,7 +8,7 @@
 * @func 返回当前路径
 * @pram 传入文件名，返回整个文件路径；传入NULL，返回当前目录
 */
-char *get_file_path(char *file_name, int suffix);
+char *get_file_path(const     char *file_name, int suffix);
 
 /*
 * @func 加载和保存MD文档目录结构

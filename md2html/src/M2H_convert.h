@@ -5,7 +5,7 @@
 #include "M2H_main.h"
 #include "M2H_loadDIR.h"
 
-#define BUFFER_SIZE 512
+#define BUFFER_SIZE 8192
 
 #define MAX_TAG_LEN 1024
 #define MAX_TXT_LEN (1024 * 4)
@@ -18,14 +18,14 @@
 *     @func 转换MD为HTML
 *     @pram md_file_path ：文件名
 */
-int M2H_convet( char *md_file_name);
+int M2H_convet(const    char *md_file_name);
 
 /*
 *     @func 复制文件
 *     @pram org_file_path ：原文件的路径
 *     @pram org_file_path ：目标文件路径
 */
-int M2H_copyFile(char *org_file_path, char *tar_file_path);
+int M2H_copyFile(const char *org_file_path, const char *tar_file_path);
 
 
 #endif

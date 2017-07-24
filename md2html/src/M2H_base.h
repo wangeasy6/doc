@@ -5,6 +5,8 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
+
 
 #define MAX_PATH_LEN 200
 
@@ -16,7 +18,7 @@ typedef struct S_CONFIG_
 {
       char md_root_path[MAX_PATH_LEN];
       char html_root_path[MAX_PATH_LEN];
-      unsigned char is_load_private;
+      int is_load_private;
 }S_CONFIG;
 
 extern S_CONFIG g_config;

@@ -62,7 +62,7 @@ static void stack_down()
       return;
 }
 
-static void analysis_md(char *sentence)
+static void analysis_md(const char *sentence)
 {
       int i = 0;
       char prefix[MAX_TAG_LEN] = {0};
@@ -136,7 +136,7 @@ static void analysis_md(char *sentence)
       return;
 }
 
-int M2H_convet( char *md_file_name)
+int M2H_convet(const    char *md_file_name)
 {
       char md_path[MAX_PATH_LEN] = {0};
       char html_path[MAX_PATH_LEN] = {0};
@@ -204,7 +204,54 @@ int M2H_convet( char *md_file_name)
       return TRUE;
 }
 
+int M2H_copyFile(const char *org_file_path, const char *tar_file_path)
+{
+      int ret = TRUE;
+      char buffer[BUFFER_SIZE] = {0};
+      printf("%s: Copy %s to %s\r\n",__FUNCTION__, org_file_path, tar_file_path);
+      
+      int fd_org = open( org_file_path, O_RDONLY );
+      if ( fd_org < 0 )
+      {
+            perror("open org");
+            return FALSE;
+      }
 
+      int fd_tar = open( tar_file_path, O_CREAT|O_WRONLY|O_TRUNC );
+      if ( fd_tar < 0 )
+      {
+            perror("open tar");
+            close(fd_org);
+            return FALSE;
+      }
+
+      int read_size;
+      while( 0 != ( read_size = read(fd_org, buffer, BUFFER_SIZE)) )
+      {
+            if (read_size < 0)
+            {
+                  perror("read fd_org");
+                  ret = FALSE;
+                  break;
+            }
+            
+            if ( 0 ==  write(fd_tar, buffer, read_size) )
+            {
+                  printf("write fd_tar error\r\n");
+                  ret = FALSE;
+                  break;
+            }
+            memset(buffer, 0, sizeof(buffer));
+      }
+
+      close(fd_org);
+      close(fd_tar);
+
+      return ret;
+}
+
+
+/*
 int M2H_copyFile(char *org_file_path, char *tar_file_path)
 {
       char buffer[BUFFER_SIZE] = {0};
@@ -217,10 +264,7 @@ int M2H_copyFile(char *org_file_path, char *tar_file_path)
             return FALSE;
       }
 
-      char test_file_path[MAX_PATH_LEN] = {"\0"};
-      strncat(test_file_path, tar_file_path, MAX_PATH_LEN);
-      //FILE *fd_tar = fopen( tar_file_path, "w" );
-      FILE *fd_tar = fopen( test_file_path, "w" );
+      FILE *fd_tar = fopen( tar_file_path, "w" );
       if ( fd_tar == NULL )
       {
             perror("open tar");
@@ -243,3 +287,4 @@ int M2H_copyFile(char *org_file_path, char *tar_file_path)
 
       return TRUE;
 }
+*/

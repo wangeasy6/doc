@@ -9,6 +9,12 @@ M2H_convert.o: M2H_convert.c
 	
 M2H_main.o: M2H_main.c
 	gcc -c $^
+
+compile:
+	sudo chmod -Rf 777 ../../MD
+	rm -rf ../../html
+	./M2H
+	sudo chmod -Rf 777 ../../html
 	
 rm:
 	-rm M2H *.o

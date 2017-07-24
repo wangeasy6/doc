@@ -7,6 +7,51 @@ S_CONFIG g_config;
 #define CONFIG_PATH "../config.ini"
 
 #define MAX_READ_LEN 512
+static int analysis_config(const char *Sentence,void *Storage_addr, char status)
+{
+      int i,j,ret;
+      switch(status)
+      {
+            case 's':
+            {
+                  for ( i = 0; i < strlen(Sentence) ; i++ )
+                  {
+                        if( '\"' == Sentence[i] )
+                        {
+                              i++;
+                              for ( j = 0; i < strlen(Sentence) && '\"' != Sentence[i] ; i++,j++ )
+                              {
+                                    *((char *)Storage_addr + j) = Sentence[i];
+                              }
+                        }
+                  }
+                  break;
+            }
+            case 'i':
+            {
+                  for ( i = 0; i < strlen(Sentence) ; i++ )
+                  {
+                        if( '=' == Sentence[i] )
+                        {
+                              i++;
+                              for ( ; i < strlen(Sentence); i++ )                   //支持中间有空格
+                              {
+                                    if ( ' ' != Sentence[i])
+                                    {
+                                          *(int *)Storage_addr = Sentence[i] - 48;
+                                          break;
+                                    }
+                              }
+                        }
+                  }
+                  break;
+            }
+            default:
+                  break;
+      }
+
+      return TRUE;
+}
 
 /*
 * @func 加载配置文件
@@ -27,51 +72,17 @@ static int M2H_loadConfig()
       {
             if ( NULL != strstr(read_str, "md_path"))
             {
-                  for ( i = 0; i < strlen(read_str) ; i++ )
-                  {
-                        if( '\"' == read_str[i] )
-                        {
-                              i++;
-                              for ( j = 0; i < strlen(read_str) && '\"' != read_str[i] ; i++,j++ )
-                              {
-                                    g_config.md_root_path[j] = read_str[i];
-                              }
-                        }
-                  }
+                  analysis_config(read_str, g_config.md_root_path, 's');
             }
             
             if ( NULL != strstr(read_str, "html_path"))
             {
-                  for ( i = 0; i < strlen(read_str) ; i++ )
-                  {
-                        if( '\"' == read_str[i] )
-                        {
-                              i++;
-                              for ( j = 0; i < strlen(read_str) && '\"' != read_str[i] ; i++,j++ )
-                              {
-                                    g_config.html_root_path[j] = read_str[i];
-                              }
-                        }
-                  }
+                  analysis_config(read_str, g_config.html_root_path, 's');
             }
              
             if ( NULL != strstr(read_str, "is_load_private"))
             {
-                  for ( i = 0; i < strlen(read_str) ; i++ )
-                  {
-                        if( '=' == read_str[i] )
-                        {
-                              i++;
-                              for ( ; i < strlen(read_str) && '\"' != read_str[i] ; i++ )
-                              {
-                                    if ( ' ' != read_str[i])
-                                    {
-                                          g_config.is_load_private = read_str[i] - 48;
-                                          break;
-                                    }
-                              }
-                        }
-                  }
+                  analysis_config(read_str, &g_config.is_load_private, 'i');
             }
       }
       return TRUE;
@@ -109,10 +120,10 @@ int main(int argc, char *argv[])
             printf("load Config failed\r\n");
             return FALSE;
       }else{
-      printf("load Config: md_path=%s html_path=%s is_load_private=%d\r\n", \
-            g_config.md_root_path, g_config.html_root_path, g_config.is_load_private);
+            printf("load Config: md_path=%s html_path=%s is_load_private=%d\r\n", \
+                  g_config.md_root_path, g_config.html_root_path, g_config.is_load_private);
       }
-
+/*
       if ( FALSE == M2H_checkDIR(g_config.html_root_path))
       {
             return FALSE;
@@ -122,6 +133,6 @@ int main(int argc, char *argv[])
       {
             printf("load DIR failed\r\n");
             return FALSE;
-      }
+      }*/
       return TRUE;
 }
