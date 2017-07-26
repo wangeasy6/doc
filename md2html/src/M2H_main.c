@@ -7,10 +7,15 @@ S_CONFIG g_config;
 #define CONFIG_PATH "../config.ini"
 
 #define MAX_READ_LEN 512
-static int analysis_config(const char *Sentence,void *Storage_addr, char status)
+static int analysis_config(const char *Sentence,void *Storage_addr, char types)
 {
       int i,j,ret;
-      switch(status)
+      if(Sentence == NULL || Storage_addr == NULL)
+      {
+            printf("prams is null\r\n");
+            return FALSE;
+      }
+      switch(types)
       {
             case 's':
             {
